@@ -31,6 +31,7 @@ MAX_CONNECTIONS="256"
 IDLE_TIMEOUT_SECONDS="60"
 EXTRA_ARGS=""
 ASSUME_YES="0"
+FREE_PORT="1"
 
 # ---- Output helpers ----------------------------------------------------------
 if [[ -t 1 ]]; then
@@ -60,6 +61,7 @@ Options:
       --extra-args "<ARGS>"   Extra raw flags passed to slipstream-server.
       --image <IMAGE>         Docker image to use (default: ${IMAGE}).
       --install-dir <PATH>    Where to place config files (default: ${INSTALL_DIR}).
+      --no-free-port          Do not touch systemd-resolved to free port 53.
   -y, --yes                   Non-interactive; assume yes to prompts.
   -h, --help                  Show this help.
 
@@ -80,6 +82,7 @@ while [[ $# -gt 0 ]]; do
         --extra-args)       EXTRA_ARGS="${2:?}"; shift 2 ;;
         --image)            IMAGE="${2:?}"; shift 2 ;;
         --install-dir)      INSTALL_DIR="${2:?}"; shift 2 ;;
+        --no-free-port)     FREE_PORT="0"; shift ;;
         -y|--yes)           ASSUME_YES="1"; shift ;;
         -h|--help)          usage; exit 0 ;;
         *) die "unknown option: $1 (try --help)" ;;
@@ -233,13 +236,65 @@ start_server() {
     info "Pulling slipstream-server image ..."
     docker pull "${IMAGE}"
     info "Starting slipstream-server ..."
-    ( cd "${SRC_DIR}" && "${COMPOSE[@]}" up -d )
+    ( cd "${SRC_DIR}" && "${COMPOSE[@]}" up -d --force-recreate )
 }
 
-port_in_use_warning() {
-    if ss -lun 2>/dev/null | grep -qE "[:.]${DNS_LISTEN_PORT}\b"; then
-        warn "UDP port ${DNS_LISTEN_PORT} already appears to be in use."
-        warn "If systemd-resolved holds :53, free it before running."
+# Is anything currently listening on the DNS UDP port?
+port_53_busy() {
+    ss -lunH 2>/dev/null | grep -qE "[:.]${DNS_LISTEN_PORT}\b"
+}
+
+# Free the DNS port automatically. We only ever touch systemd-resolved's stub
+# listener — the standard holder of :53 on Ubuntu/Debian — and we keep the
+# host's own DNS working by pointing resolv.conf at the real upstream list
+# before restarting. Any other process holding the port is left alone (we warn
+# instead of killing it).
+free_port_53() {
+    [[ "${FREE_PORT}" == "1" ]] || return 0
+    [[ "${DNS_LISTEN_PORT}" == "53" ]] || return 0
+    port_53_busy || return 0
+
+    if command -v systemctl >/dev/null 2>&1 \
+       && systemctl is-active --quiet systemd-resolved 2>/dev/null; then
+        local conf="/etc/systemd/resolved.conf"
+        if grep -qiE '^[[:space:]]*DNSStubListener[[:space:]]*=[[:space:]]*no' "${conf}" 2>/dev/null; then
+            : # stub already disabled; the holder is something else
+        else
+            info "Port 53 is held by systemd-resolved; freeing it ..."
+            # Keep host DNS alive: use the real upstream resolvers, not the stub.
+            if [[ -e /run/systemd/resolve/resolv.conf ]]; then
+                ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+            fi
+            if grep -qiE '^[[:space:]]*#?[[:space:]]*DNSStubListener' "${conf}" 2>/dev/null; then
+                sed -i -E 's|^[[:space:]]*#?[[:space:]]*DNSStubListener[[:space:]]*=.*|DNSStubListener=no|' "${conf}"
+            else
+                printf '\nDNSStubListener=no\n' >> "${conf}"
+            fi
+            systemctl restart systemd-resolved || true
+            sleep 1
+            ok "systemd-resolved stub listener disabled; port 53 freed."
+        fi
+    fi
+
+    if port_53_busy; then
+        warn "UDP port ${DNS_LISTEN_PORT} is still in use by another process."
+        warn "Find and stop it, then re-run:  sudo ss -lunp | grep ':${DNS_LISTEN_PORT}'"
+    fi
+}
+
+# Give the container a moment, then confirm it is actually running rather than
+# restarting in a crash loop (e.g. because the DNS port could not be bound).
+verify_running() {
+    sleep 3
+    local state
+    state="$(docker inspect -f '{{.State.Status}}' slipstream-server 2>/dev/null || echo unknown)"
+    if [[ "${state}" != "running" ]]; then
+        warn "Container is not running cleanly (state: ${state}). Recent logs:"
+        docker logs --tail 15 slipstream-server 2>&1 | sed 's/^/    /' >&2 || true
+        if docker logs --tail 20 slipstream-server 2>&1 | grep -qi "address already in use"; then
+            warn "Port ${DNS_LISTEN_PORT} is still taken. Free it and re-run, or see 'sudo ss -lunp | grep :${DNS_LISTEN_PORT}'."
+        fi
+        die "slipstream-server failed to start. Fix the issue above and re-run."
     fi
 }
 
@@ -265,8 +320,9 @@ main() {
     detect_compose
     prepare_install_dir
     write_env
-    port_in_use_warning
+    free_port_53
     start_server
+    verify_running
     summary
 }
 
