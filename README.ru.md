@@ -1,7 +1,5 @@
 <div align="center">
 
-[English](README.md) · [Русский](README.ru.md)
-
 <h1>⚡ Slipstream</h1>
 <p><strong>Высокопроизводительный DNS-туннель · QUIC over DNS · Rust</strong></p>
 
@@ -10,9 +8,9 @@
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=flat-square&logo=docker&logoColor=white)](deploy/)
 [![QUIC](https://img.shields.io/badge/QUIC-multipath-purple?style=flat-square)](docs/protocol.md)
 
-<br/>
-
 [Установка](#-установка-одной-командой) · [Возможности](#-возможности) · [Конфигурация](#-конфигурация) · [Бенчмарки](#-бенчмарки) · [Документация](#-документация)
+
+<sub>Also available in: <a href="README.md">English</a></sub>
 
 </div>
 
