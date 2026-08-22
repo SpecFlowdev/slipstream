@@ -2,10 +2,6 @@
 
 [English](README.md) · [中文](README.zh.md) · [Русский](README.ru.md) · [فارسی](README.fa.md)
 
-</div>
-
-<div align="center">
-
 <h1>⚡ Slipstream</h1>
 <p><strong>تونل DNS با کارایی بالا · QUIC over DNS · Rust</strong></p>
 

@@ -2,10 +2,6 @@
 
 [English](README.md) · [中文](README.zh.md) · [Русский](README.ru.md) · [فارسی](README.fa.md)
 
-</div>
-
-<div align="center">
-
 <h1>⚡ Slipstream</h1>
 <p><strong>高性能 DNS 隧道 · QUIC over DNS · Rust</strong></p>
 
