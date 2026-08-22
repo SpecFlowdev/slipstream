@@ -1,6 +1,6 @@
 <div align="center">
 <p><a href="README.md">English</a> · <a href="README.ru.md">Русский</a> · <a href="README.fa.md">فارسی</a></p>
-<h1>⚡ Slipstream</h1>
+<h1>⚡ Slipstream-installer</h1>
 <p><strong>High-performance DNS tunnel · QUIC over DNS · Rust</strong></p>
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
