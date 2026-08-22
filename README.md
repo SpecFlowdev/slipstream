@@ -11,6 +11,19 @@ This repository hosts the Rust rewrite of the [original C implementation](https:
 - Fully async with tokio.
 - And more! For a more up-to-date list of extra features, see the [merged PRs](https://github.com/Mygod/slipstream-rust/pulls?q=is%3Apr+is%3Amerged+label%3Aenhancement).
 
+## Quick start (Docker, one command)
+
+Deploy a `slipstream-server` on a fresh host (installs Docker if missing,
+builds the image, and starts the tunnel):
+
+```
+curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
+  | sudo bash -s -- --domain tunnel.example.com
+```
+
+See [deploy/README.md](deploy/README.md) for options, manual Compose usage, and
+networking notes (freeing `53/udp`, conntrack tuning).
+
 ## Quick start (local dev)
 
 Prereqs:

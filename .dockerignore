@@ -1,0 +1,9 @@
+/target/
+/.picoquic-build/
+/.interop/
+/.worktrees/
+/tools/vector_gen/build/
+**/*.rs.bk
+.git/
+.idea/
+__pycache__/

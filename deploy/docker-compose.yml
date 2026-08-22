@@ -1,0 +1,26 @@
+services:
+  slipstream-server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: slipstream-server:latest
+    container_name: slipstream-server
+    restart: unless-stopped
+    # Host networking lets the tunnel bind 53/udp directly and reach a
+    # target running on the host's 127.0.0.1 without extra plumbing.
+    network_mode: host
+    environment:
+      DOMAIN: "${DOMAIN:?set DOMAIN in .env}"
+      DNS_LISTEN_HOST: "${DNS_LISTEN_HOST:-::}"
+      DNS_LISTEN_PORT: "${DNS_LISTEN_PORT:-53}"
+      TARGET_ADDRESS: "${TARGET_ADDRESS:-127.0.0.1:5201}"
+      FALLBACK: "${FALLBACK:-}"
+      MAX_CONNECTIONS: "${MAX_CONNECTIONS:-256}"
+      IDLE_TIMEOUT_SECONDS: "${IDLE_TIMEOUT_SECONDS:-60}"
+      EXTRA_ARGS: "${EXTRA_ARGS:-}"
+      RUST_LOG: "${RUST_LOG:-info}"
+    volumes:
+      - slipstream-data:/data
+
+volumes:
+  slipstream-data:

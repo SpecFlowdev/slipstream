@@ -11,3 +11,6 @@ __pycache__/
 # Rust workspace artifacts
 /target/
 **/*.rs.bk
+
+# Deploy secrets/config
+/deploy/.env
