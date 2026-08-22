@@ -8,8 +8,14 @@
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=flat-square&logo=docker&logoColor=white)](deploy/)
 [![QUIC](https://img.shields.io/badge/QUIC-multipath-purple?style=flat-square)](docs/protocol.md)
 
-[Возможности](#-возможности) · [Конфигурация](#-конфигурация) · [Бенчмарки](#-бенчмарки) · [Документация](#-документация)
+[Установка](#-установка-одной-командой) · [Возможности](#-возможности) · [Конфигурация](#-конфигурация) · [Бенчмарки](#-бенчмарки) · [Документация](#-документация)
 </div>
+
+---
+
+## 🚀 Установка одной командой
+
+[`scripts/install.sh`](scripts/install.sh)
 
 ---
 

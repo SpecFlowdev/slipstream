@@ -17,20 +17,7 @@
 
 ## 🚀 نصب با یک دستور
 
-`slipstream-server` را روی هر سرور تازه‌ای مستقر کنید — اسکریپت در صورت نیاز Docker را نصب می‌کند، ایمیج را می‌سازد و تونل را راه‌اندازی می‌کند. **دامنه به صورت تعاملی پرسیده می‌شود:**
-
-</div>
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
-  | sudo bash
-```
-
-<div dir="rtl">
-
-همین. اسکریپت دامنه تونل را می‌پرسد، سپس سرور روی `53/udp` شروع به گوش دادن می‌کند.
-
-> برای گزینه‌ها، استفاده دستی از Compose و نکات شبکه (آزادسازی `53/udp`، تنظیم conntrack)، به [deploy/README.md](deploy/README.md) مراجعه کنید.
+[`scripts/install.sh`](scripts/install.sh)
 
 ---
 

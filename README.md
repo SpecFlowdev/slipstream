@@ -15,16 +15,7 @@
 
 ## 🚀 One-command install
 
-Deploy a full `slipstream-server` on any fresh host — installs Docker if missing, builds the image, and starts the tunnel. **The script will ask for your domain interactively:**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
-  | sudo bash
-```
-
-That's it. The script prompts for your tunnel domain, then the server starts listening on `53/udp`.
-
-> See [deploy/README.md](deploy/README.md) for options, manual Compose usage, and networking notes (freeing `53/udp`, conntrack tuning).
+[`scripts/install.sh`](scripts/install.sh)
 
 ---
 
