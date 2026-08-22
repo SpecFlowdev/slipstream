@@ -4,7 +4,7 @@ version = "0.1.1"
 edition = "2021"
 description = "Core utilities for Slipstream"
 license = "Apache-2.0"
-repository = "https://github.com/Mygod/slipstream-rust"
+repository = "https://github.com/specflowdev/slipstream"
 readme = "../../README.md"
 
 [dependencies]

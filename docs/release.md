@@ -60,11 +60,11 @@ manually for a published release.
 
 ```sh
 gh workflow run release.yml \
-  --repo Mygod/slipstream-rust \
+  --repo specflowdev/slipstream \
   -f version=vX.Y.Z \
   -f target=COMMIT_SHA \
   -f publish=false
-gh run watch --repo Mygod/slipstream-rust
+gh run watch --repo specflowdev/slipstream
 ```
 
 Use the exact commit SHA that passed validation. Do not create or push a local
@@ -81,7 +81,7 @@ after publication means the release is bad and the fix is a new version.
 - Verify the published release:
 
   ```sh
-  gh release view vX.Y.Z --repo Mygod/slipstream-rust --json assets --jq '.assets[].name'
+  gh release view vX.Y.Z --repo specflowdev/slipstream --json assets --jq '.assets[].name'
   git ls-remote --tags origin refs/tags/vX.Y.Z
   ```
 
@@ -90,9 +90,9 @@ after publication means the release is bad and the fix is a new version.
   verify the release metadata through the API instead:
 
   ```sh
-  gh api repos/Mygod/slipstream-rust/releases/tags/vX.Y.Z \
+  gh api repos/specflowdev/slipstream/releases/tags/vX.Y.Z \
     -H X-GitHub-Api-Version:2026-03-10
-  gh api repos/Mygod/slipstream-rust/immutable-releases \
+  gh api repos/specflowdev/slipstream/immutable-releases \
     -H X-GitHub-Api-Version:2026-03-10
   ```
 
