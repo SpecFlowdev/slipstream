@@ -1,3 +1,9 @@
+<div align="right">
+
+[English](README.md) · [中文](README.zh.md) · [Русский](README.ru.md) · [فارسی](README.fa.md)
+
+</div>
+
 <div align="center">
 
 <h1>⚡ Slipstream</h1>
@@ -11,10 +17,6 @@
 <br/>
 
 [Установка](#-установка-одной-командой) · [Возможности](#-возможности) · [Конфигурация](#-конфигурация) · [Бенчмарки](#-бенчмарки) · [Документация](#-документация)
-
-<br/>
-
-🌐 &nbsp;[English](README.md) &nbsp;·&nbsp; [中文](README.zh.md) &nbsp;·&nbsp; [فارسی](README.fa.md)
 
 </div>
 

@@ -1,4 +1,10 @@
-<div align="center" dir="rtl">
+<div align="right">
+
+[English](README.md) · [中文](README.zh.md) · [Русский](README.ru.md) · [فارسی](README.fa.md)
+
+</div>
+
+<div align="center">
 
 <h1>⚡ Slipstream</h1>
 <p><strong>تونل DNS با کارایی بالا · QUIC over DNS · Rust</strong></p>
@@ -11,10 +17,6 @@
 <br/>
 
 [نصب](#-نصب-با-یک-دستور) · [ویژگی‌ها](#-ویژگی‌ها) · [پیکربندی](#-پیکربندی) · [بنچمارک](#-بنچمارک) · [مستندات](#-مستندات)
-
-<br/>
-
-🌐 &nbsp;[English](README.md) &nbsp;·&nbsp; [中文](README.zh.md) &nbsp;·&nbsp; [Русский](README.ru.md)
 
 </div>
 

@@ -1,3 +1,9 @@
+<div align="right">
+
+[English](README.md) · [中文](README.zh.md) · [Русский](README.ru.md) · [فارسی](README.fa.md)
+
+</div>
+
 <div align="center">
 
 <h1>⚡ Slipstream</h1>
@@ -11,10 +17,6 @@
 <br/>
 
 [Install](#-one-command-install) · [Features](#-features) · [Configuration](#-configuration) · [Benchmarks](#-benchmarks) · [Docs](#-documentation)
-
-<br/>
-
-🌐 &nbsp;[中文](README.zh.md) &nbsp;·&nbsp; [Русский](README.ru.md) &nbsp;·&nbsp; [فارسی](README.fa.md)
 
 </div>
 
