@@ -1,5 +1,5 @@
 <div align="center">
-
+<p><a href="README.md">English</a> · <a href="README.ru.md">Русский</a> · <a href="README.fa.md">فارسی</a></p>
 <h1>⚡ Slipstream</h1>
 <p><strong>Высокопроизводительный DNS-туннель · QUIC over DNS · Rust</strong></p>
 
@@ -9,9 +9,6 @@
 [![QUIC](https://img.shields.io/badge/QUIC-multipath-purple?style=flat-square)](docs/protocol.md)
 
 [Установка](#-установка-одной-командой) · [Возможности](#-возможности) · [Конфигурация](#-конфигурация) · [Бенчмарки](#-бенчмарки) · [Документация](#-документация)
-
-<sub>Also available in: <a href="README.md">English</a></sub>
-
 </div>
 
 ---
