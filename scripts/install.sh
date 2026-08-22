@@ -96,7 +96,7 @@ require_root() {
 
 # Basic sanity check for a single domain like "tunnel.example.com".
 valid_single_domain() {
-    [[ "$1" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]
+    [[ "$1" =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$ ]]
 }
 
 # Validate a comma-separated list of domains; empty parts are rejected.
@@ -130,7 +130,7 @@ prompt_domain() {
     while :; do
         printf "Enter tunnel domain (e.g. tunnel.example.com): " > /dev/tty
         read -r DOMAIN < "${tty_in}" || die "failed to read domain."
-        DOMAIN="$(echo "${DOMAIN}" | xargs)" # trim whitespace
+        DOMAIN="$(echo "${DOMAIN}" | xargs | LC_ALL=C tr -cd 'a-zA-Z0-9.,_-')"
         if [[ -z "${DOMAIN}" ]]; then
             warn "Domain must not be empty."
             continue
