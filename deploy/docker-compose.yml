@@ -1,9 +1,6 @@
 services:
   slipstream-server:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile
-    image: slipstream-server:latest
+    image: ${SLIPSTREAM_IMAGE:-ghcr.io/specflowdev/slipstream:latest}
     container_name: slipstream-server
     restart: unless-stopped
     # Host networking lets the tunnel bind 53/udp directly and reach a

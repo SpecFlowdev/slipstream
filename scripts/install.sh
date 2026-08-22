@@ -2,8 +2,8 @@
 #
 # slipstream-server one-command installer.
 #
-# Installs Docker if missing, fetches the slipstream source, builds the server
-# image, and starts a slipstream DNS-tunnel server in a container.
+# Installs Docker if missing, pulls the pre-built slipstream-server image from
+# ghcr.io, and starts a slipstream DNS-tunnel server in a container.
 #
 # Usage (the script asks for the domain interactively):
 #   curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
@@ -20,8 +20,7 @@
 set -euo pipefail
 
 # ---- Defaults ----------------------------------------------------------------
-REPO_URL="${SLIPSTREAM_REPO_URL:-https://github.com/specflowdev/slipstream}"
-REPO_REF="${SLIPSTREAM_REPO_REF:-main}"
+IMAGE="${SLIPSTREAM_IMAGE:-ghcr.io/specflowdev/slipstream:latest}"
 INSTALL_DIR="${SLIPSTREAM_INSTALL_DIR:-/opt/slipstream}"
 
 DOMAIN=""
@@ -59,8 +58,8 @@ Options:
       --max-connections <N>   Max concurrent QUIC connections (default: ${MAX_CONNECTIONS}).
       --idle-timeout <SEC>    Idle connection timeout (default: ${IDLE_TIMEOUT_SECONDS}).
       --extra-args "<ARGS>"   Extra raw flags passed to slipstream-server.
-      --ref <GIT_REF>         Branch/tag/commit to build (default: ${REPO_REF}).
-      --install-dir <PATH>    Where to place the checkout (default: ${INSTALL_DIR}).
+      --image <IMAGE>         Docker image to use (default: ${IMAGE}).
+      --install-dir <PATH>    Where to place config files (default: ${INSTALL_DIR}).
   -y, --yes                   Non-interactive; assume yes to prompts.
   -h, --help                  Show this help.
 
@@ -79,7 +78,7 @@ while [[ $# -gt 0 ]]; do
         --max-connections)  MAX_CONNECTIONS="${2:?}"; shift 2 ;;
         --idle-timeout)     IDLE_TIMEOUT_SECONDS="${2:?}"; shift 2 ;;
         --extra-args)       EXTRA_ARGS="${2:?}"; shift 2 ;;
-        --ref)              REPO_REF="${2:?}"; shift 2 ;;
+        --image)            IMAGE="${2:?}"; shift 2 ;;
         --install-dir)      INSTALL_DIR="${2:?}"; shift 2 ;;
         -y|--yes)           ASSUME_YES="1"; shift ;;
         -h|--help)          usage; exit 0 ;;
@@ -193,41 +192,31 @@ detect_compose() {
     ok "Using compose: ${COMPOSE[*]}"
 }
 
-# ---- Source checkout ---------------------------------------------------------
-fetch_source() {
-    # If run from inside a checkout that already has the deploy assets, use it.
-    local script_dir repo_root
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    repo_root="$(cd "${script_dir}/.." && pwd)"
-    if [[ -f "${repo_root}/deploy/docker-compose.yml" ]]; then
-        info "Using existing checkout at ${repo_root}"
-        # Make sure the picoquic submodule is present.
-        if [[ ! -e "${repo_root}/vendor/picoquic/CMakeLists.txt" ]]; then
-            info "Initializing picoquic submodule ..."
-            git -C "${repo_root}" submodule update --init --recursive
-        fi
-        SRC_DIR="${repo_root}"
-        return
-    fi
+# ---- Setup install dir -------------------------------------------------------
+SRC_DIR="${INSTALL_DIR}"
 
-    command -v git >/dev/null 2>&1 || die "git is required; install git and re-run."
-    if [[ -d "${INSTALL_DIR}/.git" ]]; then
-        info "Updating existing checkout at ${INSTALL_DIR} ..."
-        git -C "${INSTALL_DIR}" fetch --depth 1 origin "${REPO_REF}"
-        git -C "${INSTALL_DIR}" checkout -f "${REPO_REF}"
-        git -C "${INSTALL_DIR}" reset --hard "origin/${REPO_REF}" 2>/dev/null || true
-        git -C "${INSTALL_DIR}" submodule update --init --recursive
-    else
-        info "Cloning ${REPO_URL} (ref ${REPO_REF}) into ${INSTALL_DIR} ..."
-        mkdir -p "${INSTALL_DIR}"
-        git clone --recurse-submodules --branch "${REPO_REF}" "${REPO_URL}" "${INSTALL_DIR}"
-    fi
-    SRC_DIR="${INSTALL_DIR}"
+prepare_install_dir() {
+    mkdir -p "${INSTALL_DIR}"
+    # Write a self-contained compose file (no build needed).
+    cat > "${INSTALL_DIR}/docker-compose.yml" <<COMPOSE
+services:
+  slipstream-server:
+    image: ${IMAGE}
+    container_name: slipstream-server
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    volumes:
+      - slipstream-data:/data
+
+volumes:
+  slipstream-data:
+COMPOSE
 }
 
 # ---- Compose env + up --------------------------------------------------------
 write_env() {
-    local env_file="${SRC_DIR}/deploy/.env"
+    local env_file="${SRC_DIR}/.env"
     info "Writing ${env_file}"
     cat > "${env_file}" <<ENV
 DOMAIN=${DOMAIN}
@@ -241,14 +230,16 @@ ENV
 }
 
 start_server() {
-    info "Building and starting slipstream-server (first build may take several minutes) ..."
-    ( cd "${SRC_DIR}/deploy" && "${COMPOSE[@]}" up -d --build )
+    info "Pulling slipstream-server image ..."
+    docker pull "${IMAGE}"
+    info "Starting slipstream-server ..."
+    ( cd "${SRC_DIR}" && "${COMPOSE[@]}" up -d )
 }
 
 port_in_use_warning() {
     if ss -lun 2>/dev/null | grep -qE "[:.]${DNS_LISTEN_PORT}\b"; then
         warn "UDP port ${DNS_LISTEN_PORT} already appears to be in use."
-        warn "If systemd-resolved holds :53, free it before running (see deploy/README.md)."
+        warn "If systemd-resolved holds :53, free it before running."
     fi
 }
 
@@ -258,11 +249,11 @@ summary() {
     echo "  domain         : ${DOMAIN}"
     echo "  dns listen port: ${DNS_LISTEN_PORT}/udp"
     echo "  target address : ${TARGET_ADDRESS}"
-    echo "  source dir     : ${SRC_DIR}"
+    echo "  install dir    : ${SRC_DIR}"
     echo
     echo "Manage it with:"
-    echo "  cd ${SRC_DIR}/deploy && ${COMPOSE[*]} logs -f"
-    echo "  cd ${SRC_DIR}/deploy && ${COMPOSE[*]} down"
+    echo "  cd ${SRC_DIR} && ${COMPOSE[*]} logs -f"
+    echo "  cd ${SRC_DIR} && ${COMPOSE[*]} down"
 }
 
 main() {
@@ -272,7 +263,7 @@ main() {
     install_docker
     ensure_docker_running
     detect_compose
-    fetch_source
+    prepare_install_dir
     write_env
     port_in_use_warning
     start_server
