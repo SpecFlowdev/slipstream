@@ -5,7 +5,14 @@ Run a `slipstream-server` DNS tunnel in Docker with a single command.
 ## One-command install
 
 On a fresh server (installs Docker if missing, builds the image, and starts
-the server):
+the server). The script asks for the tunnel domain interactively:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
+  | sudo bash
+```
+
+Or pass the domain up front to skip the prompt:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
@@ -15,6 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts
 From a local checkout:
 
 ```bash
+sudo ./scripts/install.sh                            # prompts for the domain
 sudo ./scripts/install.sh --domain tunnel.example.com
 ```
 
@@ -29,7 +37,7 @@ The installer:
 
 | Flag | Meaning | Default |
 | --- | --- | --- |
-| `-d, --domain` | Tunnel domain (comma-separate for several) | required |
+| `-d, --domain` | Tunnel domain (comma-separate for several); prompted if omitted | asked |
 | `-t, --target` | Where decrypted traffic is forwarded | `127.0.0.1:5201` |
 | `--port` | DNS listen port | `53` |
 | `--fallback` | Forward non-DNS UDP to this endpoint | disabled |

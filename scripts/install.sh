@@ -5,11 +5,16 @@
 # Installs Docker if missing, fetches the slipstream source, builds the server
 # image, and starts a slipstream DNS-tunnel server in a container.
 #
-# Usage:
+# Usage (the script asks for the domain interactively):
+#   curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
+#     | sudo bash
+#
+# Or pass it up front:
 #   curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
 #     | sudo bash -s -- --domain tunnel.example.com
 #
-# Or, from a checkout:
+# From a checkout:
+#   sudo ./scripts/install.sh            # prompts for the domain
 #   sudo ./scripts/install.sh --domain tunnel.example.com
 #
 set -euo pipefail
@@ -45,7 +50,8 @@ usage() {
 ${C_BOLD}slipstream-server installer${C_RESET}
 
 Options:
-  -d, --domain <DOMAIN>       Tunnel domain (required). Comma-separate for several.
+  -d, --domain <DOMAIN>       Tunnel domain (comma-separate for several).
+                              If omitted, the script asks for it interactively.
   -t, --target <HOST:PORT>    Where the server forwards decrypted traffic
                               (default: ${TARGET_ADDRESS}).
       --port <PORT>           DNS listen port (default: ${DNS_LISTEN_PORT}).
@@ -88,14 +94,54 @@ require_root() {
     fi
 }
 
+# Basic sanity check for a single domain like "tunnel.example.com".
+valid_single_domain() {
+    [[ "$1" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]
+}
+
+# Validate a comma-separated list of domains; empty parts are rejected.
+valid_domain() {
+    local input="$1" part
+    [[ -n "${input}" ]] || return 1
+    IFS=',' read -ra _parts <<< "${input}"
+    for part in "${_parts[@]}"; do
+        part="$(echo "${part}" | xargs)"
+        valid_single_domain "${part}" || return 1
+    done
+    return 0
+}
+
 prompt_domain() {
-    if [[ -z "${DOMAIN}" ]]; then
-        if [[ "${ASSUME_YES}" == "1" || ! -t 0 ]]; then
-            die "--domain is required."
-        fi
-        read -rp "Enter tunnel domain (e.g. tunnel.example.com): " DOMAIN
-        [[ -n "${DOMAIN}" ]] || die "--domain is required."
+    [[ -n "${DOMAIN}" ]] && return
+
+    # When piped (curl | bash) stdin is the script, so read from the terminal
+    # directly via /dev/tty. Fall back to stdin only if it is itself a tty.
+    local tty_in=""
+    if [[ -r /dev/tty ]]; then
+        tty_in="/dev/tty"
+    elif [[ -t 0 ]]; then
+        tty_in="/dev/stdin"
     fi
+
+    if [[ "${ASSUME_YES}" == "1" || -z "${tty_in}" ]]; then
+        die "no domain provided and no terminal to prompt on. Pass --domain <domain>."
+    fi
+
+    while :; do
+        printf "Enter tunnel domain (e.g. tunnel.example.com): " > /dev/tty
+        read -r DOMAIN < "${tty_in}" || die "failed to read domain."
+        DOMAIN="$(echo "${DOMAIN}" | xargs)" # trim whitespace
+        if [[ -z "${DOMAIN}" ]]; then
+            warn "Domain must not be empty."
+            continue
+        fi
+        if ! valid_domain "${DOMAIN}"; then
+            warn "'${DOMAIN}' does not look like a valid domain. Try again."
+            continue
+        fi
+        break
+    done
+    ok "Using domain: ${DOMAIN}"
 }
 
 SUDO_KEEP=""
