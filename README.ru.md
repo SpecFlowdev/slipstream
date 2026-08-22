@@ -8,23 +8,8 @@
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=flat-square&logo=docker&logoColor=white)](deploy/)
 [![QUIC](https://img.shields.io/badge/QUIC-multipath-purple?style=flat-square)](docs/protocol.md)
 
-[Установка](#-установка-одной-командой) · [Возможности](#-возможности) · [Конфигурация](#-конфигурация) · [Бенчмарки](#-бенчмарки) · [Документация](#-документация)
+[Возможности](#-возможности) · [Конфигурация](#-конфигурация) · [Бенчмарки](#-бенчмарки) · [Документация](#-документация)
 </div>
-
----
-
-## 🚀 Установка одной командой
-
-Разверните полноценный `slipstream-server` на любом чистом хосте — скрипт автоматически установит Docker (если его нет), соберёт образ и запустит туннель. **Домен спрашивается интерактивно:**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
-  | sudo bash
-```
-
-Всё. Скрипт запросит домен туннеля, после чего сервер начнёт слушать на `53/udp`.
-
-> Опции, ручное использование Compose и сетевые заметки (освобождение `53/udp`, настройка conntrack) — в [deploy/README.md](deploy/README.md).
 
 ---
 
