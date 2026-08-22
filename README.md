@@ -10,7 +10,11 @@
 
 <br/>
 
-[Install](#-one-command-install) · [How it works](#-how-it-works) · [Features](#-features) · [Configuration](#-configuration) · [Benchmarks](#-benchmarks) · [Docs](#-documentation)
+[Install](#-one-command-install) · [Features](#-features) · [Configuration](#-configuration) · [Benchmarks](#-benchmarks) · [Docs](#-documentation)
+
+<br/>
+
+🌐 &nbsp;[中文](README.zh.md) &nbsp;·&nbsp; [Русский](README.ru.md) &nbsp;·&nbsp; [فارسی](README.fa.md)
 
 </div>
 
@@ -28,16 +32,6 @@ curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts
 That's it. The script prompts for your tunnel domain, then the server starts listening on `53/udp`.
 
 > See [deploy/README.md](deploy/README.md) for options, manual Compose usage, and networking notes (freeing `53/udp`, conntrack tuning).
-
----
-
-## 🔭 How it works
-
-<div align="center">
-  <img src=".github/diagram.svg" alt="Slipstream architecture diagram"/>
-</div>
-
-Data flows through ordinary DNS queries and responses, tunnelling arbitrary QUIC streams invisibly through networks that block or inspect everything else.
 
 ---
 
