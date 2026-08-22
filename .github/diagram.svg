@@ -1,0 +1,119 @@
+<svg viewBox="0 0 660 600" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#60a5fa"/>
+    </marker>
+    <marker id="arr-blue-l" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto">
+      <polygon points="8 0,0 3,8 6" fill="#60a5fa"/>
+    </marker>
+    <marker id="arr-slate" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#94a3b8"/>
+    </marker>
+    <marker id="arr-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#34d399"/>
+    </marker>
+    <marker id="arr-green-l" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto">
+      <polygon points="8 0,0 3,8 6" fill="#34d399"/>
+    </marker>
+
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#0a0f1e"/>
+    </linearGradient>
+    <linearGradient id="client-fill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#172554" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="server-fill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a3a2a" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#052e16" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="660" height="600" rx="14" fill="url(#bg)"/>
+
+  <!-- ── CLIENT SIDE panel ──────────────────────────── -->
+  <rect x="12" y="12" width="636" height="182" rx="10"
+        fill="url(#client-fill)" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="330" y="31" text-anchor="middle" font-size="9.5" font-weight="700"
+        fill="#93c5fd" letter-spacing="5">CLIENT  SIDE</text>
+
+  <!-- Your App box -->
+  <rect x="24" y="46" width="125" height="130" rx="8"
+        fill="#1e40af" stroke="#60a5fa" stroke-width="1.5" filter="url(#glow-blue)"/>
+  <text x="86" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Your App</text>
+  <text x="86" y="108" text-anchor="middle" font-size="11" fill="#bfdbfe">browser,</text>
+  <text x="86" y="125" text-anchor="middle" font-size="11" fill="#bfdbfe">proxy, CLI…</text>
+  <text x="86" y="149" text-anchor="middle" font-size="10" fill="#60a5fa">TCP client</text>
+
+  <!-- slipstream-client box -->
+  <rect x="172" y="46" width="464" height="130" rx="8"
+        fill="#1e3a8a" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="404" y="83" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">slipstream-client</text>
+  <text x="404" y="106" text-anchor="middle" font-size="11" fill="#93c5fd">encodes QUIC frames → DNS TXT queries (base32)</text>
+  <text x="404" y="124" text-anchor="middle" font-size="11" fill="#93c5fd">decodes DNS responses → QUIC stream data</text>
+  <text x="404" y="143" text-anchor="middle" font-size="10" fill="#60a5fa">multipath QUIC  ·  encrypted end-to-end  ·  SIP003</text>
+  <text x="404" y="162" text-anchor="middle" font-size="10" fill="#3b82f6">--tcp-listen-port  --resolver  --domain</text>
+
+  <!-- TCP arrows (App ↔ client) -->
+  <line x1="149" y1="96" x2="170" y2="96"
+        stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <line x1="170" y1="116" x2="149" y2="116"
+        stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arr-blue-l)"/>
+  <text x="159" y="91" text-anchor="middle" font-size="9" fill="#93c5fd">TCP</text>
+
+  <!-- DNS/UDP arrow down from client ── -->
+  <line x1="404" y1="176" x2="404" y2="248"
+        stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr-slate)"/>
+  <text x="425" y="217" font-size="11" fill="#94a3b8">DNS / UDP  53</text>
+
+  <!-- ── DNS Resolver ────────────────────────────────── -->
+  <rect x="252" y="248" width="304" height="62" rx="8"
+        fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+  <text x="404" y="274" text-anchor="middle" font-size="13" font-weight="700" fill="#e2e8f0">DNS Resolver</text>
+  <text x="404" y="294" text-anchor="middle" font-size="11" fill="#94a3b8">public recursive  ·  or your own authoritative NS</text>
+
+  <!-- DNS/UDP arrow down from resolver ── -->
+  <line x1="404" y1="310" x2="404" y2="380"
+        stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr-slate)"/>
+  <text x="425" y="349" font-size="11" fill="#94a3b8">DNS / UDP  53</text>
+
+  <!-- ── SERVER SIDE panel ──────────────────────────── -->
+  <rect x="12" y="380" width="636" height="208" rx="10"
+        fill="url(#server-fill)" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="330" y="399" text-anchor="middle" font-size="9.5" font-weight="700"
+        fill="#86efac" letter-spacing="5">SERVER  SIDE</text>
+
+  <!-- slipstream-server box -->
+  <rect x="24" y="408" width="612" height="110" rx="8"
+        fill="#14532d" stroke="#22c55e" stroke-width="1.5" filter="url(#glow-green)"/>
+  <text x="330" y="442" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">slipstream-server</text>
+  <text x="330" y="464" text-anchor="middle" font-size="11" fill="#86efac">decodes DNS TXT ↔ QUIC frames  ·  unwraps stream payload</text>
+  <text x="330" y="482" text-anchor="middle" font-size="11" fill="#86efac">auto TLS ECDSA P-256  ·  stateless reset  ·  SIP003 plugin mode</text>
+  <text x="330" y="501" text-anchor="middle" font-size="10" fill="#4ade80">Tokio async  ·  picoquic multipath QUIC  ·  /data volume cert storage</text>
+
+  <!-- TCP arrow down to Target ── -->
+  <line x1="330" y1="518" x2="330" y2="547"
+        stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <text x="350" y="536" font-size="10" fill="#6ee7b7">TCP / any protocol</text>
+
+  <!-- Target Service box -->
+  <rect x="210" y="547" width="240" height="32" rx="6"
+        fill="#065f46" stroke="#34d399" stroke-width="1.5"/>
+  <text x="330" y="568" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">Target Service</text>
+
+  <!-- Footer -->
+  <text x="330" y="592" text-anchor="middle" font-size="10" fill="#334155">
+    Traffic tunnels through ordinary DNS queries · invisible to network filters · QUIC encrypted end-to-end
+  </text>
+</svg>

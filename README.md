@@ -18,21 +18,14 @@
 
 ## 🚀 One-command install
 
-Deploy a full `slipstream-server` on any fresh host — installs Docker if missing, builds the image, and starts the tunnel. The script will prompt you for your domain:
+Deploy a full `slipstream-server` on any fresh host — installs Docker if missing, builds the image, and starts the tunnel. **The script will ask for your domain interactively:**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
   | sudo bash
 ```
 
-Or pass the domain up front to skip the prompt:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
-  | sudo bash -s -- --domain tunnel.example.com
-```
-
-That's it. The server starts listening on `53/udp` and is ready to accept clients.
+That's it. The script prompts for your tunnel domain, then the server starts listening on `53/udp`.
 
 > See [deploy/README.md](deploy/README.md) for options, manual Compose usage, and networking notes (freeing `53/udp`, conntrack tuning).
 
@@ -40,38 +33,9 @@ That's it. The server starts listening on `53/udp` and is ready to accept client
 
 ## 🔭 How it works
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        CLIENT  SIDE                                  │
-│                                                                       │
-│   ┌──────────────┐    TCP     ┌──────────────────────────────────┐   │
-│   │   Your App   │ ─────────► │       slipstream-client          │   │
-│   │  (browser,   │            │                                  │   │
-│   │   proxy…)    │ ◄───────── │  wraps QUIC packets into DNS     │   │
-│   └──────────────┘            │  TXT queries (base32-encoded)    │   │
-│                               └──────────────┬───────────────────┘   │
-└──────────────────────────────────────────────│─────────────────────── ┘
-                                               │ DNS/UDP  53
-                              ┌────────────────▼──────────────────┐
-                              │         DNS Resolver               │
-                              │   (public resolver or your own)   │
-                              └────────────────┬──────────────────┘
-                                               │ DNS/UDP  53
-┌──────────────────────────────────────────────│─────────────────────── ┐
-│                        SERVER  SIDE          │                         │
-│                               ┌─────────────▼────────────────────┐   │
-│                               │       slipstream-server           │   │
-│                               │                                   │   │
-│                               │  decodes DNS TXT ↔ QUIC frames   │   │
-│                               │  unwraps QUIC stream payload      │   │
-│                               └──────────────┬────────────────────┘   │
-│                                              │ TCP / any protocol      │
-│                               ┌─────────────▼────────────────────┐   │
-│                               │        Target Service             │   │
-│                               │   (SOCKS5, HTTP, custom…)        │   │
-│                               └──────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────┘
-```
+<div align="center">
+  <img src=".github/diagram.svg" alt="Slipstream architecture diagram" width="660"/>
+</div>
 
 Data flows through ordinary DNS queries and responses, tunnelling arbitrary QUIC streams invisibly through networks that block or inspect everything else.
 
