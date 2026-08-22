@@ -32,6 +32,7 @@ IDLE_TIMEOUT_SECONDS="60"
 EXTRA_ARGS=""
 ASSUME_YES="0"
 FREE_PORT="1"
+TUNE_SYSCTL="1"
 
 # ---- Output helpers ----------------------------------------------------------
 if [[ -t 1 ]]; then
@@ -62,6 +63,7 @@ Options:
       --image <IMAGE>         Docker image to use (default: ${IMAGE}).
       --install-dir <PATH>    Where to place config files (default: ${INSTALL_DIR}).
       --no-free-port          Do not touch systemd-resolved to free port 53.
+      --no-sysctl             Do not tune UDP socket buffers (net.core.*mem*).
   -y, --yes                   Non-interactive; assume yes to prompts.
   -h, --help                  Show this help.
 
@@ -83,6 +85,7 @@ while [[ $# -gt 0 ]]; do
         --image)            IMAGE="${2:?}"; shift 2 ;;
         --install-dir)      INSTALL_DIR="${2:?}"; shift 2 ;;
         --no-free-port)     FREE_PORT="0"; shift ;;
+        --no-sysctl)        TUNE_SYSCTL="0"; shift ;;
         -y|--yes)           ASSUME_YES="1"; shift ;;
         -h|--help)          usage; exit 0 ;;
         *) die "unknown option: $1 (try --help)" ;;
@@ -129,10 +132,16 @@ prompt_domain() {
         die "no domain provided and no terminal to prompt on. Pass --domain <domain>."
     fi
 
+    local reply
     while :; do
-        printf "Enter tunnel domain (e.g. tunnel.example.com): " > /dev/tty
-        read -r DOMAIN < "${tty_in}" || die "failed to read domain."
-        DOMAIN="$(echo "${DOMAIN}" | xargs | LC_ALL=C tr -cd 'a-zA-Z0-9.,_-')"
+        reply=""
+        # -e gives readline line editing (backspace/arrows work, the prompt is
+        # never eaten); reading with fd 0 redirected to the terminal makes
+        # readline drive that tty even under `curl | bash`.
+        if ! IFS= read -r -e -p "Enter tunnel domain (e.g. tunnel.example.com): " reply < "${tty_in}"; then
+            die "failed to read domain."
+        fi
+        DOMAIN="$(printf '%s' "${reply}" | xargs | LC_ALL=C tr -cd 'a-zA-Z0-9.,_-')"
         if [[ -z "${DOMAIN}" ]]; then
             warn "Domain must not be empty."
             continue
@@ -232,6 +241,31 @@ EXTRA_ARGS=${EXTRA_ARGS}
 ENV
 }
 
+# Enlarge UDP socket buffers so the tunnel can sustain high throughput, and
+# persist them so they survive a reboot. Applied live via sysctl; if the host
+# forbids live changes (some containers), the file still takes effect on boot.
+tune_sysctl() {
+    [[ "${TUNE_SYSCTL}" == "1" ]] || return 0
+    command -v sysctl >/dev/null 2>&1 || { warn "sysctl not found; skipping UDP buffer tuning."; return 0; }
+
+    local sysctl_file="/etc/sysctl.d/99-slipstream.conf"
+    info "Tuning UDP socket buffers (net.core.*mem* = 25 MiB) ..."
+    mkdir -p /etc/sysctl.d
+    cat > "${sysctl_file}" <<'SYSCTL'
+# slipstream: larger UDP socket buffers for high-throughput DNS tunnelling
+net.core.rmem_max=26214400
+net.core.wmem_max=26214400
+net.core.rmem_default=26214400
+net.core.wmem_default=26214400
+SYSCTL
+
+    if sysctl -p "${sysctl_file}" >/dev/null 2>&1; then
+        ok "UDP buffers applied and persisted to ${sysctl_file}."
+    else
+        warn "Could not apply sysctl live (host may restrict it); saved to ${sysctl_file} for next boot."
+    fi
+}
+
 start_server() {
     info "Pulling slipstream-server image ..."
     docker pull "${IMAGE}"
@@ -320,6 +354,7 @@ main() {
     detect_compose
     prepare_install_dir
     write_env
+    tune_sysctl
     free_port_53
     start_server
     verify_running
