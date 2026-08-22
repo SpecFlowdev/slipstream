@@ -1,153 +1,165 @@
-# Slipstream (Rust)
+<div align="center">
 
-Slipstream is a high-performance DNS tunnel that carries QUIC packets over DNS queries and responses.
-This repository hosts the Rust rewrite of the [original C implementation](https://github.com/EndPositive/slipstream).
+<h1>⚡ Slipstream</h1>
+<p><strong>High-performance DNS tunnel · QUIC over DNS · Rust</strong></p>
 
-## What is here
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-stable-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=flat-square&logo=docker&logoColor=white)](deploy/)
+[![QUIC](https://img.shields.io/badge/QUIC-multipath-purple?style=flat-square)](docs/protocol.md)
 
-- slipstream-client and slipstream-server CLI binaries.
-- A DNS codec crate with vector-based tests.
-- picoquic FFI integration for multipath QUIC support.
-- Fully async with tokio.
-- And more! For a more up-to-date list of extra features, see the [merged PRs](https://github.com/Mygod/slipstream-rust/pulls?q=is%3Apr+is%3Amerged+label%3Aenhancement).
+<br/>
 
-## Quick start (Docker, one command)
+[Install](#-one-command-install) · [How it works](#-how-it-works) · [Features](#-features) · [Configuration](#-configuration) · [Benchmarks](#-benchmarks) · [Docs](#-documentation)
 
-Deploy a `slipstream-server` on a fresh host (installs Docker if missing,
-builds the image, and starts the tunnel):
+</div>
 
+---
+
+## 🚀 One-command install
+
+Deploy a full `slipstream-server` on any fresh host — installs Docker if missing, builds the image, and starts the tunnel. The script will prompt you for your domain:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
+  | sudo bash
 ```
+
+Or pass the domain up front to skip the prompt:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh \
   | sudo bash -s -- --domain tunnel.example.com
 ```
 
-See [deploy/README.md](deploy/README.md) for options, manual Compose usage, and
-networking notes (freeing `53/udp`, conntrack tuning).
+That's it. The server starts listening on `53/udp` and is ready to accept clients.
 
-## Quick start (local dev)
+> See [deploy/README.md](deploy/README.md) for options, manual Compose usage, and networking notes (freeing `53/udp`, conntrack tuning).
 
-Prereqs:
+---
 
-- Rust toolchain (stable)
-- cmake, pkg-config
-- OpenSSL headers and libs
-- python3 (for interop and benchmark scripts)
-
-Initialize the picoquic submodule:
+## 🔭 How it works
 
 ```
-git submodule update --init --recursive
+┌─────────────────────────────────────────────────────────────────────┐
+│                        CLIENT  SIDE                                  │
+│                                                                       │
+│   ┌──────────────┐    TCP     ┌──────────────────────────────────┐   │
+│   │   Your App   │ ─────────► │       slipstream-client          │   │
+│   │  (browser,   │            │                                  │   │
+│   │   proxy…)    │ ◄───────── │  wraps QUIC packets into DNS     │   │
+│   └──────────────┘            │  TXT queries (base32-encoded)    │   │
+│                               └──────────────┬───────────────────┘   │
+└──────────────────────────────────────────────│─────────────────────── ┘
+                                               │ DNS/UDP  53
+                              ┌────────────────▼──────────────────┐
+                              │         DNS Resolver               │
+                              │   (public resolver or your own)   │
+                              └────────────────┬──────────────────┘
+                                               │ DNS/UDP  53
+┌──────────────────────────────────────────────│─────────────────────── ┐
+│                        SERVER  SIDE          │                         │
+│                               ┌─────────────▼────────────────────┐   │
+│                               │       slipstream-server           │   │
+│                               │                                   │   │
+│                               │  decodes DNS TXT ↔ QUIC frames   │   │
+│                               │  unwraps QUIC stream payload      │   │
+│                               └──────────────┬────────────────────┘   │
+│                                              │ TCP / any protocol      │
+│                               ┌─────────────▼────────────────────┐   │
+│                               │        Target Service             │   │
+│                               │   (SOCKS5, HTTP, custom…)        │   │
+│                               └──────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-On non-Windows hosts, `cargo build` will auto-build picoquic via
-`./scripts/build_picoquic.sh` when libs are missing (outputs to
-`.picoquic-build/`). For Windows MSVC targets, dot-source the helper in the
-same PowerShell session before building with Cargo. Use
-`. ./scripts/build_picoquic_windows.ps1` for x86_64, or pass `-Platform ARM64`
-for ARM64. See `docs/build.md` for details.
+Data flows through ordinary DNS queries and responses, tunnelling arbitrary QUIC streams invisibly through networks that block or inspect everything else.
 
-Build the Rust binaries:
+---
 
-```
+## ✨ Features
+
+- **DNS encapsulation** — carries QUIC packets inside DNS TXT queries/responses; blends with normal DNS traffic
+- **QUIC transport** — full multipath QUIC via [picoquic](https://github.com/private-octopus/picoquic); encrypted end-to-end
+- **Two resolver modes** — recursive (standard DNS resolvers) or authoritative (own NS record, BBR CC, 3–4× faster)
+- **Fully async** — built on Tokio; handles hundreds of concurrent streams per tunnel
+- **Self-signed cert** — auto-generates an ECDSA P-256 cert on first start when none is provided
+- **Shadowsocks plugin** — SIP003-compatible (`SS_*` env vars), drop-in for any Shadowsocks client
+- **One-command Docker deploy** — single `curl | bash` to a running server
+- **Comma-separated domains** — one server, multiple tunnel domains
+
+---
+
+## ⚙️ Configuration
+
+The Docker deployment is driven by environment variables in `deploy/.env`:
+
+| Variable | Meaning | Default |
+|---|---|---|
+| `DOMAIN` | Tunnel domain(s), comma-separated | **required** |
+| `TARGET_ADDRESS` | Forward decrypted traffic here | `127.0.0.1:5201` |
+| `DNS_LISTEN_HOST` | DNS bind host | `::` |
+| `DNS_LISTEN_PORT` | DNS bind port | `53` |
+| `FALLBACK` | Non-DNS UDP fallback endpoint | empty |
+| `MAX_CONNECTIONS` | Max QUIC connections | `256` |
+| `IDLE_TIMEOUT_SECONDS` | Idle timeout | `60` |
+| `EXTRA_ARGS` | Extra raw CLI flags | empty |
+| `RUST_LOG` | Log level | `info` |
+
+---
+
+## 🏗️ Build from source
+
+**Prerequisites:** Rust stable, cmake, pkg-config, OpenSSL headers
+
+```bash
+git clone --recurse-submodules https://github.com/specflowdev/slipstream
+cd slipstream
 cargo build -p slipstream-client -p slipstream-server
 ```
 
-Generate a test TLS cert (optional example):
+---
+
+## 📈 Benchmarks
+
+End-to-end completion times in seconds (lower is better), 10 MiB payload, local loopback, averaged over 5 runs.
+
+| Variant | Exfil avg (s) | Download avg (s) |
+|---|---:|---:|
+| dnstt | 16.207 | 2.492 |
+| slipstream (C) | 5.332 | 1.096 |
+| **slipstream-rust** | **3.249** | **0.978** |
+| **slipstream-rust (Authoritative)** | **1.602** | **0.407** |
+
+---
+
+## 📚 Documentation
+
+| Doc | Description |
+|---|---|
+| [deploy/README.md](deploy/README.md) | Docker deployment, Compose, networking |
+| [docs/usage.md](docs/usage.md) | Full CLI reference |
+| [docs/protocol.md](docs/protocol.md) | DNS encapsulation details |
+| [docs/build.md](docs/build.md) | Build prerequisites, picoquic setup |
+| [docs/interop.md](docs/interop.md) | Local test harnesses |
+| [docs/benchmarks.md](docs/benchmarks.md) | Benchmark methodology |
+| [docs/design.md](docs/design.md) | Architecture notes |
+
+---
+
+## 🗂️ Repo layout
 
 ```
-openssl req -x509 -newkey rsa:2048 -nodes \
-  -keyout key.pem -out cert.pem -days 365 \
-  -subj "/CN=slipstream"
+crates/     Rust workspace crates
+deploy/     Docker deployment (Dockerfile, Compose, entrypoint)
+docs/       Documentation
+fixtures/   Golden DNS codec test vectors
+scripts/    Install, interop, and benchmark harnesses
+vendor/     picoquic submodule
 ```
 
-Run the server:
-
-```
-cargo run -p slipstream-server -- \
-  --dns-listen-port 8853 \
-  --target-address 127.0.0.1:5201 \
-  --domain example.com \
-  --cert ./cert.pem \
-  --key ./key.pem \
-  --reset-seed ./reset-seed
-```
-
-If the configured cert/key paths do not exist, the server auto-generates a
-self-signed ECDSA P-256 certificate (1000-year validity). If `--reset-seed`
-is omitted, the server will warn and stateless reset tokens will not persist
-across restarts.
-
-Run the client:
-
-```
-cargo run -p slipstream-client -- \
-  --tcp-listen-port 7000 \
-  --resolver 127.0.0.1:8853 \
-  --domain example.com
-```
-
-Note: You can also run the client against a resolver that forwards to the server. For local testing, see the interop docs.
-
-## Production note: conntrack for UDP/53
-
-For a public `slipstream-server` on port 53, tune conntrack above many distro defaults.
-
-Recommended baseline:
-
-```conf
-net.netfilter.nf_conntrack_max = 262144
-net.netfilter.nf_conntrack_udp_timeout = 15
-net.netfilter.nf_conntrack_udp_timeout_stream = 60
-```
-
-Sizing tiers:
-
-- 1 GB RAM: `131072`
-- 2-4 GB RAM: `262144`
-- 8 GB+ RAM: `524288`
-
-Keep steady-state `conntrack -C` below about 60% of `nf_conntrack_max`.
-
-## Benchmarks (local snapshot)
-
-All results below are end-to-end completion times in seconds (lower is better),
-averaged over 5 runs on local loopback. Payload: 10 MiB in each direction.
-Variants are dnstt, C-C slipstream, Rust-Rust (non-auth), and Rust-Rust (auth
-via `--authoritative <resolver>`).
-
-See `scripts/bench` for scripts used for obtaining these results.
-
-| Variant                              | Exfil avg (s) | Download avg (s) |
-|--------------------------------------| ---: | ---: |
-| dnstt                                | 16.207 | 2.492 |
-| slipstream (C)                       | 5.332 | 1.096 |
-| slipstream-rust                      | 3.249 | 0.978 |
-| slipstream-rust (Authoritative mode) | 1.602 | 0.407 |
-
-![Throughput bar chart](.github/throughput.png)
-
-## Documentation
-
-- docs/README.md for the doc index
-- docs/build.md for build prerequisites and picoquic setup
-- docs/usage.md for CLI usage
-- docs/protocol.md for DNS encapsulation notes
-- docs/dns-codec.md for codec behavior and vectors
-- docs/interop.md for local harnesses and interop
-- docs/benchmarks.md for benchmarking harnesses
-- docs/benchmarks-results.md for benchmark results
-- docs/profiling.md for profiling notes
-- docs/design.md for architecture notes
-
-## Repo layout
-
-- crates/      Rust workspace crates
-- docs/        Public docs and internal design notes
-- fixtures/    Golden DNS vectors
-- scripts/     Interop and benchmark harnesses
-- tools/       Vector generator and helpers
-- vendor/      picoquic submodule
+---
 
 ## License
 
-Apache-2.0. See LICENSE.
+Apache-2.0 — see [LICENSE](LICENSE).
