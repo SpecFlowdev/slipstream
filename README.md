@@ -15,7 +15,9 @@
 
 ## 🚀 One-command install
 
-[`scripts/install.sh`](scripts/install.sh)
+```bash
+curl -fsSL https://raw.githubusercontent.com/specflowdev/slipstream/main/scripts/install.sh | sudo bash
+```
 
 ---
 
