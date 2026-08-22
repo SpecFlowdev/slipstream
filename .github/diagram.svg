@@ -1,86 +1,87 @@
-<svg viewBox="0 0 700 560" xmlns="http://www.w3.org/2000/svg"
+<svg width="680" height="520" viewBox="0 0 680 520"
+     xmlns="http://www.w3.org/2000/svg"
      font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
   <defs>
     <marker id="a" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
-      <polygon points="0 0,7 2.5,0 5" fill="#484848"/>
+      <polygon points="0 0,7 2.5,0 5" fill="#6e7681"/>
     </marker>
     <marker id="al" markerWidth="7" markerHeight="5" refX="1" refY="2.5" orient="auto">
-      <polygon points="7 0,0 2.5,7 5" fill="#484848"/>
+      <polygon points="7 0,0 2.5,7 5" fill="#6e7681"/>
     </marker>
   </defs>
 
   <!-- Background -->
-  <rect width="700" height="560" rx="14" fill="#0c0c0c"/>
+  <rect width="680" height="520" rx="12" fill="#0d1117"/>
 
-  <!-- ─── CLIENT SIDE panel ───────────────────────────────── -->
-  <rect x="15" y="15" width="670" height="188" rx="10"
-        fill="#111111" stroke="#272727" stroke-width="1" stroke-dasharray="5 4"/>
-  <text x="350" y="34" text-anchor="middle" font-size="9" font-weight="600"
-        fill="#333333" letter-spacing="6">C L I E N T   S I D E</text>
+  <!-- ══ CLIENT SIDE panel ════════════════════════════════════ -->
+  <rect x="14" y="14" width="652" height="185" rx="8"
+        fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="326" y="32" text-anchor="middle" font-size="9" font-weight="600"
+        fill="#484f58" letter-spacing="5">C L I E N T   S I D E</text>
 
   <!-- Your App -->
-  <rect x="28" y="46" width="150" height="135" rx="8" fill="#181818" stroke="#282828" stroke-width="1"/>
-  <rect x="28" y="46" width="150" height="3" rx="3" fill="#303030"/>
-  <text x="103" y="87"  text-anchor="middle" font-size="14" font-weight="600" fill="#d8d8d8">Your App</text>
-  <text x="103" y="110" text-anchor="middle" font-size="11" fill="#5a5a5a">browser · proxy</text>
-  <text x="103" y="128" text-anchor="middle" font-size="11" fill="#5a5a5a">CLI · SOCKS5</text>
-  <text x="103" y="160" text-anchor="middle" font-size="10" fill="#383838">TCP client</text>
+  <rect x="26" y="42" width="148" height="132" rx="6" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+  <rect x="26" y="42" width="148" height="2" rx="2" fill="#388bfd" opacity="0.5"/>
+  <text x="100" y="84"  text-anchor="middle" font-size="14" font-weight="600" fill="#e6edf3">Your App</text>
+  <text x="100" y="106" text-anchor="middle" font-size="11" fill="#8b949e">browser · proxy</text>
+  <text x="100" y="123" text-anchor="middle" font-size="11" fill="#8b949e">CLI · SOCKS5</text>
+  <text x="100" y="155" text-anchor="middle" font-size="10" fill="#484f58"
+        font-family="'SF Mono', Menlo, Consolas, monospace">TCP client</text>
 
   <!-- TCP arrows -->
-  <line x1="178" y1="98"  x2="194" y2="98"  stroke="#484848" stroke-width="1.5" marker-end="url(#a)"/>
-  <line x1="194" y1="118" x2="178" y2="118" stroke="#484848" stroke-width="1.5" marker-end="url(#al)"/>
-  <text x="186" y="94" text-anchor="middle" font-size="9" fill="#3a3a3a">TCP</text>
+  <line x1="174" y1="96"  x2="190" y2="96"  stroke="#6e7681" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="190" y1="114" x2="174" y2="114" stroke="#6e7681" stroke-width="1.5" marker-end="url(#al)"/>
+  <text x="182" y="92" text-anchor="middle" font-size="9" fill="#484f58">TCP</text>
 
   <!-- slipstream-client -->
-  <rect x="196" y="46" width="477" height="135" rx="8" fill="#181818" stroke="#282828" stroke-width="1"/>
-  <rect x="196" y="46" width="477" height="3" rx="3" fill="#303030"/>
-  <text x="434" y="86"  text-anchor="middle" font-size="15" font-weight="600" fill="#e0e0e0">slipstream-client</text>
-  <text x="434" y="110" text-anchor="middle" font-size="11" fill="#5a5a5a">QUIC packets  →  DNS TXT queries  (base32-encoded)</text>
-  <text x="434" y="128" text-anchor="middle" font-size="11" fill="#5a5a5a">DNS responses  →  QUIC stream data</text>
-  <text x="434" y="160" text-anchor="middle" font-size="10" fill="#383838">multipath QUIC  ·  end-to-end encrypted  ·  SIP003</text>
+  <rect x="192" y="42" width="460" height="132" rx="6" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+  <rect x="192" y="42" width="460" height="2" rx="2" fill="#388bfd" opacity="0.5"/>
+  <text x="422" y="80"  text-anchor="middle" font-size="15" font-weight="600" fill="#e6edf3">slipstream-client</text>
+  <text x="422" y="104" text-anchor="middle" font-size="11" fill="#8b949e">QUIC packets  →  DNS TXT queries  (base32)</text>
+  <text x="422" y="122" text-anchor="middle" font-size="11" fill="#8b949e">DNS responses  →  QUIC stream data</text>
+  <text x="422" y="154" text-anchor="middle" font-size="10" fill="#484f58"
+        font-family="'SF Mono', Menlo, Consolas, monospace">multipath QUIC · end-to-end encrypted · SIP003</text>
 
   <!-- DNS/UDP arrow ↓ -->
-  <line x1="434" y1="203" x2="434" y2="258"
-        stroke="#363636" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#a)"/>
-  <rect x="450" y="220" width="96" height="18" rx="4" fill="#0c0c0c"/>
-  <text x="498" y="233" text-anchor="middle" font-size="10" fill="#484848">DNS / UDP  53</text>
+  <line x1="422" y1="199" x2="422" y2="254"
+        stroke="#30363d" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <rect x="438" y="216" width="94" height="17" rx="4" fill="#0d1117"/>
+  <text x="485" y="229" text-anchor="middle" font-size="10"
+        fill="#6e7681" font-family="'SF Mono', Menlo, Consolas, monospace">DNS / UDP 53</text>
 
-  <!-- ─── DNS Resolver ─────────────────────────────────────── -->
-  <rect x="278" y="258" width="312" height="58" rx="8" fill="#141414" stroke="#242424" stroke-width="1"/>
-  <rect x="278" y="258" width="312" height="3" rx="3" fill="#2a2a2a"/>
-  <text x="434" y="283" text-anchor="middle" font-size="13" font-weight="600" fill="#c8c8c8">DNS Resolver</text>
-  <text x="434" y="302" text-anchor="middle" font-size="11" fill="#484848">public recursive  ·  or your own authoritative NS</text>
+  <!-- ══ DNS Resolver ════════════════════════════════════════ -->
+  <rect x="272" y="254" width="300" height="56" rx="6" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
+  <text x="422" y="278" text-anchor="middle" font-size="13" font-weight="600" fill="#cdd9e5">DNS Resolver</text>
+  <text x="422" y="297" text-anchor="middle" font-size="11" fill="#6e7681">public recursive  ·  or your own authoritative NS</text>
 
   <!-- DNS/UDP arrow ↓ -->
-  <line x1="434" y1="316" x2="434" y2="365"
-        stroke="#363636" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#a)"/>
-  <rect x="450" y="332" width="96" height="18" rx="4" fill="#0c0c0c"/>
-  <text x="498" y="345" text-anchor="middle" font-size="10" fill="#484848">DNS / UDP  53</text>
+  <line x1="422" y1="310" x2="422" y2="360"
+        stroke="#30363d" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <rect x="438" y="326" width="94" height="17" rx="4" fill="#0d1117"/>
+  <text x="485" y="339" text-anchor="middle" font-size="10"
+        fill="#6e7681" font-family="'SF Mono', Menlo, Consolas, monospace">DNS / UDP 53</text>
 
-  <!-- ─── SERVER SIDE panel ───────────────────────────────── -->
-  <rect x="15" y="365" width="670" height="180" rx="10"
-        fill="#0f0f0f" stroke="#222222" stroke-width="1" stroke-dasharray="5 4"/>
-  <text x="350" y="383" text-anchor="middle" font-size="9" font-weight="600"
-        fill="#2a2a2a" letter-spacing="6">S E R V E R   S I D E</text>
+  <!-- ══ SERVER SIDE panel ════════════════════════════════════ -->
+  <rect x="14" y="360" width="652" height="146" rx="8"
+        fill="#0f1419" stroke="#30363d" stroke-width="1"/>
+  <text x="326" y="377" text-anchor="middle" font-size="9" font-weight="600"
+        fill="#3d4451" letter-spacing="5">S E R V E R   S I D E</text>
 
   <!-- slipstream-server -->
-  <rect x="196" y="390" width="477" height="105" rx="8" fill="#181818" stroke="#282828" stroke-width="1"/>
-  <rect x="196" y="390" width="477" height="3" rx="3" fill="#303030"/>
-  <text x="434" y="424" text-anchor="middle" font-size="15" font-weight="600" fill="#e0e0e0">slipstream-server</text>
-  <text x="434" y="448" text-anchor="middle" font-size="11" fill="#5a5a5a">DNS TXT  ↔  QUIC frames  ·  unwraps stream payload</text>
-  <text x="434" y="477" text-anchor="middle" font-size="10" fill="#383838">auto TLS (ECDSA P-256)  ·  stateless reset  ·  Tokio async</text>
+  <rect x="192" y="382" width="460" height="100" rx="6" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+  <rect x="192" y="382" width="460" height="2" rx="2" fill="#3fb950" opacity="0.4"/>
+  <text x="422" y="416" text-anchor="middle" font-size="15" font-weight="600" fill="#e6edf3">slipstream-server</text>
+  <text x="422" y="440" text-anchor="middle" font-size="11" fill="#8b949e">DNS TXT  ↔  QUIC frames  ·  unwraps stream payload</text>
+  <text x="422" y="470" text-anchor="middle" font-size="10" fill="#484f58"
+        font-family="'SF Mono', Menlo, Consolas, monospace">auto TLS (ECDSA P-256) · stateless reset · Tokio async</text>
 
   <!-- TCP arrow ↓ -->
-  <line x1="434" y1="495" x2="434" y2="518"
-        stroke="#303030" stroke-width="1" marker-end="url(#a)"/>
-  <text x="450" y="511" font-size="10" fill="#383838">TCP</text>
+  <line x1="422" y1="482" x2="422" y2="504"
+        stroke="#30363d" stroke-width="1" marker-end="url(#a)"/>
+  <text x="440" y="497" font-size="10" fill="#484f58"
+        font-family="'SF Mono', Menlo, Consolas, monospace">TCP</text>
 
   <!-- Target Service -->
-  <rect x="308" y="518" width="252" height="26" rx="6" fill="#141414" stroke="#222222" stroke-width="1"/>
-  <text x="434" y="535" text-anchor="middle" font-size="12" font-weight="500" fill="#888888">Target Service</text>
-
-  <!-- Caption -->
-  <text x="350" y="556" text-anchor="middle" font-size="10" fill="#282828">
-    Ordinary DNS queries · invisible to network filters · QUIC encrypted end-to-end
-  </text>
+  <rect x="302" y="504" width="240" height="24" rx="5" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
+  <text x="422" y="520" text-anchor="middle" font-size="12" font-weight="500" fill="#8b949e">Target Service</text>
 </svg>

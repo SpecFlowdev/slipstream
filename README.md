@@ -34,7 +34,7 @@ That's it. The script prompts for your tunnel domain, then the server starts lis
 ## 🔭 How it works
 
 <div align="center">
-  <img src=".github/diagram.svg" alt="Slipstream architecture diagram" width="660"/>
+  <img src=".github/diagram.svg" alt="Slipstream architecture diagram"/>
 </div>
 
 Data flows through ordinary DNS queries and responses, tunnelling arbitrary QUIC streams invisibly through networks that block or inspect everything else.
