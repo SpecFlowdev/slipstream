@@ -1,6 +1,6 @@
 <div align="center">
 
-[English](README.md) · [Русский](README.ru.md) · [فارسی](README.fa.md)
+[English](README.md) · [Русский](README.ru.md)
 
 <h1>⚡ Slipstream</h1>
 <p><strong>Высокопроизводительный DNS-туннель · QUIC over DNS · Rust</strong></p>
